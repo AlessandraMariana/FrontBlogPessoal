@@ -2,10 +2,55 @@ import React, { useEffect, useState } from 'react'
 import {Typography, Button, Card, CardActions, CardContent } from "@material-ui/core"
 import {Box} from '@mui/material';
 import './DeletarPostagem.css';
+import { useNavigate, useParams } from 'react-router-dom';
 import Postagem from '../../../models/Postagem';
 import { buscaId, deleteId } from '../../../services/Service';
+import { useSelector } from 'react-redux';
+import { TokenState } from '../../../store/tokens/tokensReducer';
 
 function DeletarPostagem() {
+    let navigate = useNavigate();
+    const { id } = useParams<{id: string}>();
+    const token = useSelector<TokenState, TokenState["tokens"]>(
+      (state) => state.tokens
+    );
+    const [post, setPosts] = useState<Postagem>()
+
+    useEffect(() => {
+        if (token == "") {
+            alert("Você precisa estar logado")
+            navigate("/login")
+    
+        }
+    }, [token])
+
+    useEffect(() =>{
+        if(id !== undefined){
+            findById(id)
+        }
+    }, [id])
+
+    async function findById(id: string) {
+        buscaId(`/postagens/${id}`, setPosts, {
+            headers: {
+              'Authorization': token
+            }
+          })
+        }
+
+        function sim() {
+          navigate('/posts')
+            deleteId(`/postagens/${id}`, {
+              headers: {
+                'Authorization': token
+              }
+            });
+            alert('Postagem deletada com sucesso');
+          }
+        
+          function nao() {
+            navigate('/posts')
+          }
    
   return (
     <>
